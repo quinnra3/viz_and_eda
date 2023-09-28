@@ -7,7 +7,14 @@ date: "2023-09-28"
 ```{r}
 library(tidyverse)
 library(ggridges)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
 ```
+^ use to set all figures at the same size or aspect ratio
 
 Get the data for plotting: 
 
@@ -150,6 +157,24 @@ weather_df |>
 ^line plots are helpful for longitudinal data
 
 
+## saving and embedding plots
+
+```{r}
+ggp_weather = 
+    weather_df |> 
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point()
+
+ggp_weather
+
+ggsave("results/ggp_weather.pdf", ggp_weather)
+```
+
+change scale of plot 
+
+```{r, fig.width = 6, fig.asp = .6}
+ggp_weather
+```
 
 
 
