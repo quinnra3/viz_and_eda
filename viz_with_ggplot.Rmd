@@ -38,7 +38,6 @@ weather_df =
 weather_df
 ```
 
-
 Make a scatterplot of precipitation across tmin and tmax:
 
 ```{r}
@@ -99,10 +98,7 @@ weather_df |>
   filter(name != "CentralPark_NY") |> 
   ggplot(aes(x = date, y = tmax, color = name)) +
   geom_point(alpha = .7, size = .5)
-```
 
-
-```{r}
 ggplot(weather_df, aes(x = tmax, y = tmin)) + 
   geom_hex()
 ```
@@ -154,8 +150,8 @@ weather_df |>
   geom_line(alpha = 0.5) + 
   geom_point(size = 0.5)
 ```
-^line plots are helpful for longitudinal data
 
+^line plots are helpful for longitudinal data
 
 ## saving and embedding plots
 
