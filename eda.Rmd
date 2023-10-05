@@ -1,0 +1,175 @@
+---
+title: "eda"
+output: github_document
+date: "2023-09-28"
+---
+
+first, load the libraries:
+
+```{r}
+library(tidyverse)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+```
+
+second, load the same code as yesterday to pull the data: 
+
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USW00022534", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2021-01-01",
+    date_max = "2022-12-31") |>
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USW00022534 = "Molokai_HI",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10,
+    month = lubridate::floor_date(date, unit = "month")) |>
+  select(name, id, everything())
+```
+
+^ same code as 10/3, but added `month = lubridate` code 
+
+## Initial numeric work
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = prcp)) + 
+  geom_histogram()
+```
+
+here are the big outliers: 
+
+```{r}
+weather_df |> 
+  filter(prcp > 1000)
+```
+
+```{r}
+weather_df |> 
+  filter(tmax >= 20, tmax <= 30) |> 
+  ggplot(aes(x= tmin, y = tmax, color = name)) + 
+  geom_point()
+```
+
+^ why does Molokai appear in bands? take a closer look at just the data first, important to understand what's going on with the data before experimenting
+
+## Grouping
+
+```{r}
+weather_df |> 
+  group_by(name, month)
+```
+
+^ 72 unique groups (of name, month) in this dataset 
+
+## Counting
+
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  summarize(n_obs = n())
+```
+^ the only things that have been retained are the variables defined by `group_by` structure, and counting the number of observations `n`
+
+```{r}
+weather_df |> 
+  group_by(month) |> 
+  summarize(n_obs = n())
+```
+
+```{r}
+weather_df |> 
+  count(name, name = "n_obs")
+```
+^ `count` works instead of `summarize` for a total # of observations instead of a list. name the column using `name =` 
+
+```{r}
+weather_df |> 
+  count(name, month) |> 
+  pivot_wider(
+    names_from = name,
+    values_from = n
+  )
+```
+
+^ `pivot_wider` is the opposite purpose of `pivot_longer` -> make data table more human readable (`pivot_longer` makes data usable)
+
+
+## General summaries
+
+```{r}
+weather_df |> 
+  drop_na(tmax) |> 
+  group_by(name, month) |> 
+  summarize(
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    median_tmax = median(tmax, na.rm = TRUE),
+    sd_tmax = sd(tmax, na.rm = TRUE)
+  )
+```
+
+^ table for what is the average tmax by name and month, by mean, median, and max for `tmax`. 
+
+?? what is `na.rm`?? 
+
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  summarize(mean_tmax = mean(tmax, na.rm = TRUE)) |> 
+  ggplot(aes(x = month, y = mean_tmax, color=name)) +
+  geom_point() +
+  geom_line()
+```
+
+^gives a summary of the data - you can build off of a dataframe to  `mutate` or `group_by` once you have the dataframe. 
+
+### pivot_wider and why it works
+
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  summarize(mean_tmax = mean(tmax, na.rm = TRUE)) |> 
+  pivot_wider(
+    names_from= name,
+    values_from = mean_tmax
+  ) |> 
+  knitr::kable(digits = 2)
+```
+
+^ make a table in Rmarkdown doc when knitting using `knitr::kable()` package. never have to make your own tables by hand!!! 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
