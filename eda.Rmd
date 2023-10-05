@@ -149,14 +149,55 @@ weather_df |>
 ^ make a table in Rmarkdown doc when knitting using `knitr::kable()` package. never have to make your own tables by hand!!! 
 
 
+## Grouped Mutate
+
+```{r}
+weather_df |>
+  group_by(name) |>
+  mutate(mean_tmax = mean(tmax, na.rm = TRUE),
+         centered_tmax = tmax - mean_tmax) |> 
+  ggplot(aes(x = date, y = centered_tmax, color = name)) + 
+  geom_point() 
+```
+
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  mutate(tmax_rank = min_rank(desc(tmax))) |> 
+  filter(tmax_rank < 2)
+```
+
+lags
+
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  mutate(yesterday_tmax = lag(tmax, 3))
+```
+
+^ `lags` are used to compare an observation to it’s previous value. This is useful, for example, to find the day-by-day change in max temperature within each station over the year:
 
 
+- must use `group_by` when using `lag` so it knows where to pull the correct data from
 
 
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  mutate(temp_change = tmax - lag(tmax))
+```
 
 
+```{r}
+weather_df |>
+  group_by(name) |>
+  mutate(temp_change = tmax - lag(tmax)) |>
+  summarize(
+    sd_temp_change = sd(temp_change, na.rm = TRUE),
+    temp_change_max = max(temp_change, na.rm = TRUE))
+```
 
-
+^ standard deviation of the temperature change across three different weather stations, and the maximum temperature in each of these locations
 
 
 
